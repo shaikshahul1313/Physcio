@@ -1,0 +1,25 @@
+{
+  "stories": [
+    {
+      "id": "1",
+      "title": "Back Pain Recovery",
+      "description": "Patient recovered completely in just 2 weeks with our personalized home physiotherapy program.",
+      "image": null,
+      "createdAt": "2024-04-01T10:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "title": "Sports Injury Rehabilitation",
+      "description": "Professional athlete returned to peak performance after targeted rehab sessions at home.",
+      "image": null,
+      "createdAt": "2024-04-05T14:30:00.000Z"
+    },
+    {
+      "id": "3",
+      "title": "Post-Surgery Mobility",
+      "description": "Rapid recovery and improved mobility after knee surgery with consistent home visits.",
+      "image": null,
+      "createdAt": "2024-04-10T09:15:00.000Z"
+    }
+  ]
+}

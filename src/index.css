@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&amp;display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&amp;display=swap');
+
+@layer components {
+  .doctor-name {
+    font-family: 'Great Vibes', cursive;
+    font-size: 2.8rem;
+    font-weight: 400;
+    color: #FFD700;
+    text-shadow: 0 2px 8px rgba(255, 215, 0, 0.6);
+    letter-spacing: 1px;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+
+  .doctor-name:hover {
+    transform: scale(1.05);
+  }
+
+  @media (max-width: 768px) {
+    .doctor-name {
+      font-size: 2.2rem;
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .whatsapp-btn {
+    background: #25D366;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .call-btn {
+    background: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .whatsapp-btn:hover,
+  .call-btn:hover {
+    transform: scale(1.05);
+  }
+}

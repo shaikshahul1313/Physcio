@@ -1,0 +1,41 @@
+{
+  "name": "recovery-lab",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.88.13",
+    "@react-three/fiber": "^8.16.8",
+    "framer-motion": "^10.16.16",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.10.1",
+    "three": "^0.183.2",
+    "react-hot-toast": "^2.4.1",
+    "react-router-dom": "^6.22.3",
+"@mediapipe/camera_utils":"^0.3.1675466862",
+"@mediapipe/control_utils":"^0.6.1675466023",
+"@mediapipe/drawing_utils":"^0.3.1675466124",
+"@mediapipe/pose":"^0.5.1675469404",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "autoprefixer": "^10.4.14",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "postcss": "^8.4.27",
+    "tailwindcss": "^3.3.3",
+    "vite": "^4.4.5"
+  }
+}
