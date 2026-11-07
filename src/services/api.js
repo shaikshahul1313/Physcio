@@ -9,9 +9,44 @@ const api = axios.create({
   },
 });
 
+// Settings & Profile API
+export const getSettings = async () => {
+  const response = await api.get('/settings');
+  return response.data;
+};
+
+export const updateSettings = async (settingsData) => {
+  const response = await api.post('/settings', settingsData);
+  return response.data;
+};
+
+export const uploadProfilePhoto = async (file) => {
+  const formData = new FormData();
+  formData.append('image', file);
+  const response = await api.post('/profile-photo', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+};
+
 // Booking API
 export const submitBooking = async (bookingData) => {
   const response = await api.post('/bookings', bookingData);
+  return response.data;
+};
+
+export const getBookings = async () => {
+  const response = await api.get('/bookings');
+  return response.data;
+};
+
+export const deleteBooking = async (id) => {
+  const response = await api.delete(`/bookings/${id}`);
+  return response.data;
+};
+
+export const updateBookingStatus = async (id, status) => {
+  const response = await api.patch(`/bookings/${id}`, { status });
   return response.data;
 };
 
@@ -22,23 +57,18 @@ export const getSuccessStories = async () => {
 };
 
 export const createSuccessStory = async (storyData) => {
-  try {
-    console.log("Sending data:", storyData.title, storyData.description, storyData.image ? storyData.image.name : 'no image');
-    const formData = new FormData();
-    formData.append('title', storyData.title);
-    formData.append('description', storyData.description);
-    if (storyData.image) {
-      formData.append('image', storyData.image);
-    }
-
-    const response = await api.post('/success-stories', formData);
-    return response.data;
-  } catch (error) {
-    console.error('API createSuccessStory error:', error.response?.data || error.message);
-    throw error;
+  const formData = new FormData();
+  formData.append('title', storyData.title);
+  formData.append('description', storyData.description);
+  if (storyData.image) {
+    formData.append('image', storyData.image);
   }
-};
 
+  const response = await api.post('/success-stories', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+};
 
 export const deleteSuccessStory = async (id) => {
   const response = await api.delete(`/success-stories/${id}`);

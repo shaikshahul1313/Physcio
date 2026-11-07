@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ADMIN_CREDENTIALS = {
-  username: 'Admin@123',
-  password: 'ShaikshaheedAdmin@123'
+  username: 'Shaikshaheed143',
+  password: 'Shaikshaheed143786'
 };
 
 const AuthContext = createContext();
@@ -55,3 +55,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+

@@ -1,241 +1,378 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { FaWhatsapp, FaEnvelope, FaCalendarAlt, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { submitBooking } from '../services/api';
+import { usePractice } from '../context/PracticeContext';
 
-const initialFormData = {
-  name: '',
-  email: '',
-  phone: '',
-  service: '',
-  date: '',
-  time: '',
-  message: '',
+const conditionOptions = {
+  Orthopedics: [
+    'Shoulder',
+    'Elbow',
+    'Wrist',
+    'Knee',
+    'Ankle',
+    'Cervical / Neck Pain',
+    'Lower Back / Lumbar'
+  ],
+  Neurology: [
+    'Stroke & Hemiplegia',
+    'Post-Stroke Rehabilitation',
+    'Neuropathy & Numbness',
+    'Bell’s Palsy / Facial Rehab',
+    'Balance & Gait Disorder'
+  ],
+  Cardiology: [
+    'Cardiac Rehabilitation',
+    'Post-Cardiac Surgery Recovery',
+    'Chest Physiotherapy & Breathing',
+    'Hypertension Conditioning',
+    'Aerobic Endurance Training'
+  ],
+  Sports: [
+    'ACL & Ligament Tear',
+    'Muscle Strain & Sprain',
+    'Tennis / Golfer’s Elbow',
+    'Runner’s Knee (Patellofemoral)',
+    'Post-Match Recovery & Mobility'
+  ]
 };
 
 const Booking = () => {
-  const [formData, setFormData] = useState(initialFormData);
-  const [isLoading, setIsLoading] = useState(false);
+  const { settings, selectedCondition, setSelectedCondition } = usePractice();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    age: '',
+    gender: 'Male',
+    condition: 'Orthopedics',
+    subCondition: 'Shoulder',
+    description: '',
+    phone: '',
+    email: '',
+    date: new Date().toISOString().split('T')[0],
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const resetTimerRef = useRef(null);
 
+  // Sync when user clicked a specialization card
   useEffect(() => {
-    return () => {
-      if (resetTimerRef.current) {
-        window.clearTimeout(resetTimerRef.current);
-      }
-    };
-  }, []);
+    if (selectedCondition?.condition && conditionOptions[selectedCondition.condition]) {
+      setFormData((prev) => ({
+        ...prev,
+        condition: selectedCondition.condition,
+        subCondition: selectedCondition.subCondition || conditionOptions[selectedCondition.condition][0]
+      }));
+    }
+  }, [selectedCondition]);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((currentFormData) => ({ ...currentFormData, [name]: value }));
+  const handleConditionChange = (conditionKey) => {
+    setFormData((prev) => ({
+      ...prev,
+      condition: conditionKey,
+      subCondition: conditionOptions[conditionKey][0]
+    }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const { name, email, phone, service, date, time } = formData;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    // Validation
-    if (!name || !email || !phone || !service || !date || !time) {
-      toast.error('Please fill all required fields.');
+    if (!formData.name.trim()) {
+      toast.error('Please enter the patient name.');
+      return;
+    }
+    if (!formData.age || formData.age <= 0) {
+      toast.error('Please enter a valid age.');
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
 
-    // Format WhatsApp message
-    const message = `Hello, I want to book a session.
+    try {
+      // 1. Save booking to local backend & dispatch email to shaheedshaik236@gmail.com
+      await submitBooking({
+        name: formData.name,
+        age: formData.age,
+        gender: formData.gender,
+        condition: formData.condition,
+        subCondition: formData.subCondition,
+        description: formData.description,
+        phone: formData.phone || settings.phone || '9392473392',
+        email: formData.email || settings.email || 'shaheedshaik236@gmail.com',
+        date: formData.date,
+        serviceMode: settings.serviceMode === 'home_visits' ? 'Home Visit' : settings.serviceMode === 'clinic' ? 'In-Clinic' : 'Home Visit / Clinic'
+      });
 
-Name: ${name}
-Email: ${email}
-Phone: ${phone}
-Service: ${service}
-Date: ${date}
-Time: ${time}
-Message: ${formData.message || 'N/A'}`;
+      // 2. Format clinical referral message for WhatsApp
+      const adminPhone = (settings.phone || '9392473392').replace(/[^0-9]/g, '');
+      const waMessage = `*New Appointment Request - Dr. Shaik Mohamed Shaheed*
 
-    const phoneNumber = '919392473392'; // Admin number without +
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+*Patient Name:* ${formData.name}
+*Age / Gender:* ${formData.age} years / ${formData.gender}
+*Specialization:* ${formData.condition}
+*Specific Area/Condition:* ${formData.subCondition}
+*Preferred Date:* ${formData.date}
+*Symptoms / History:* ${formData.description || 'None provided'}
+*Phone:* ${formData.phone || 'Provided via WhatsApp'}
 
-    // Open WhatsApp
-    window.open(whatsappURL, '_blank');
+_Submitted via Physio Pulse Website_`;
 
-    toast.success('Opening WhatsApp with your booking details...');
+      const encodedMessage = encodeURIComponent(waMessage);
+      const whatsappUrl = `https://wa.me/91${adminPhone}?text=${encodedMessage}`;
 
-    // Reset form and show success
-    setFormData(initialFormData);
-    setSubmitted(true);
-    
-    if (resetTimerRef.current) {
-      window.clearTimeout(resetTimerRef.current);
+      // 3. Open WhatsApp for instant doctor communication
+      window.open(whatsappUrl, '_blank');
+
+      toast.success('Appointment details saved! Opening WhatsApp for instant confirmation...');
+      setSubmitted(true);
+    } catch (error) {
+      console.error('Booking submission error:', error);
+      // Fallback: Still open WhatsApp even if local server email fails
+      const adminPhone = (settings.phone || '9392473392').replace(/[^0-9]/g, '');
+      const waMessage = `*Appointment Request:* ${formData.name} (${formData.age}y/${formData.gender}) - ${formData.condition} (${formData.subCondition}). ${formData.description}`;
+      window.open(`https://wa.me/91${adminPhone}?text=${encodeURIComponent(waMessage)}`, '_blank');
+      toast.success('Connecting directly to WhatsApp...');
+      setSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    resetTimerRef.current = window.setTimeout(() => {
-      setSubmitted(false);
-    }, 5000);
+  };
 
-    setIsLoading(false);
+  const handleReset = () => {
+    setFormData({
+      name: '',
+      age: '',
+      gender: 'Male',
+      condition: 'Orthopedics',
+      subCondition: 'Shoulder',
+      description: '',
+      phone: '',
+      email: '',
+      date: new Date().toISOString().split('T')[0],
+    });
+    setSubmitted(false);
   };
 
   return (
-    <section id="booking" className="py-20 bg-white dark:bg-gray-800">
+    <section id="booking" className="py-20 bg-white dark:bg-gray-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Wireframe Heading "Book an appointment" */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">Book Your Session</h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300">Take the first step towards pain-free living via WhatsApp.</p>
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 mb-3">
+            <span>Fast Consultation Booking</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            Book an Appointment
+          </h2>
+          <p className="mt-2 text-base sm:text-lg text-gray-600 dark:text-gray-300">
+            Fill out your details below. You will receive immediate WhatsApp & Email confirmation with Dr. Shaik Mohamed Shaheed.
+          </p>
         </motion.div>
-        {!submitted ? (
-          <motion.form
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            onSubmit={handleSubmit}
-            className="rounded-lg bg-gradient-to-br from-teal-50 to-blue-50 p-8 shadow-lg dark:from-gray-700 dark:to-gray-600"
-          >
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div>
-                <label htmlFor="name" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name *</label>
-                <input 
-                  type="text" 
-                  id="name" 
-                  name="name" 
-                  value={formData.name} 
-                  onChange={handleChange} 
-                  required 
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all dark:bg-gray-700 dark:border-gray-600" 
-                />
+
+        {/* Main Booking Form Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="bg-gradient-to-br from-teal-50/50 via-white to-blue-50/40 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 sm:p-10"
+        >
+          {submitted ? (
+            <div className="text-center py-10 space-y-5">
+              <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                <FaCheckCircle size={40} />
               </div>
-              <div>
-                <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Email *</label>
-                <input 
-                  type="email" 
-                  id="email" 
-                  name="email" 
-                  value={formData.email} 
-                  onChange={handleChange} 
-                  required 
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all dark:bg-gray-700 dark:border-gray-600" 
-                />
-              </div>
-              <div>
-                <label htmlFor="phone" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Phone *</label>
-                <input 
-                  type="tel" 
-                  id="phone" 
-                  name="phone" 
-                  value={formData.phone} 
-                  onChange={handleChange} 
-                  required 
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all dark:bg-gray-700 dark:border-gray-600" 
-                />
-              </div>
-              <div>
-                <label htmlFor="service" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Service Type *</label>
-                <select 
-                  id="service" 
-                  name="service" 
-                  value={formData.service} 
-                  onChange={handleChange} 
-                  required 
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all dark:bg-gray-700 dark:border-gray-600"
-                >
-                  <option value="">Select a service</option>
-                  <option value="initial-consultation">Initial Consultation</option>
-                  <option value="follow-up">Follow-up Session</option>
-                  <option value="recovery-program">Recovery Program</option>
-                  <option value="sports-rehab">Sports Rehabilitation</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="date" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Preferred Date *</label>
-                <input 
-                  type="date" 
-                  id="date" 
-                  name="date" 
-                  value={formData.date} 
-                  onChange={handleChange} 
-                  required 
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all dark:bg-gray-700 dark:border-gray-600" 
-                />
-              </div>
-              <div>
-                <label htmlFor="time" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Preferred Time *</label>
-                <input 
-                  type="time" 
-                  id="time" 
-                  name="time" 
-                  value={formData.time} 
-                  onChange={handleChange} 
-                  required 
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all dark:bg-gray-700 dark:border-gray-600" 
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label htmlFor="message" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Additional Message (Optional)
-                </label>
-                <textarea 
-                  id="message" 
-                  name="message" 
-                  value={formData.message} 
-                  onChange={handleChange} 
-                  rows={4}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-vertical transition-all dark:bg-gray-700 dark:border-gray-600" 
-                  placeholder="Tell us more about your condition, pain areas, or preferences..."
-                />
-              </div>
-            </div>
-            <div className="mt-8 text-center">
-              <motion.button 
-                whileHover={{ scale: 1.05 }} 
-                whileTap={{ scale: 0.95 }} 
-                type="submit" 
-                disabled={isLoading}
-                className="group relative rounded-full bg-gradient-to-r from-teal-500 to-green-500 px-10 py-4 font-semibold text-white shadow-xl transition-all hover:shadow-2xl hover:from-teal-600 hover:to-green-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex items-center gap-3 mx-auto"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Redirecting to WhatsApp...
-                  </>
-                ) : (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 group-hover:animate-bounce">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a15.96 15.96 0 01-.09-.979 12.638 12.638 0 01-2.707-7.74A9 9 0 013 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
-                    </svg>
-                    Book via WhatsApp
-                  </>
-                )}
-              </motion.button>
-              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-                We'll receive your details instantly on WhatsApp 📱
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Booking Request Sent!
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto text-sm sm:text-base">
+                Your appointment request has been recorded and WhatsApp opened to chat directly with Dr. Shaik Mohamed Shaheed.
               </p>
+              <button
+                onClick={handleReset}
+                className="inline-flex items-center px-6 py-2.5 rounded-full text-sm font-semibold text-teal-600 bg-teal-50 dark:bg-teal-900/30 hover:bg-teal-100 dark:hover:bg-teal-900/50 transition"
+              >
+                Book Another Appointment
+              </button>
             </div>
-          </motion.form>
-        ) : (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }} 
-            animate={{ opacity: 1, scale: 1 }} 
-            transition={{ duration: 0.8 }} 
-            className="rounded-xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-12 text-center shadow-2xl dark:from-green-900/30 dark:to-emerald-900/30"
-          >
-            <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 p-2 text-green-600 dark:bg-green-900">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-8 w-8">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0Z" />
-              </svg>
-            </div>
-            <div className="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-green-600">Success!</div>
-            <h3 className="mb-4 text-3xl font-bold text-green-800 dark:text-green-200">Booking Sent to WhatsApp</h3>
-            <p className="text-lg text-green-700 dark:text-green-300 mb-6">Your appointment details have been sent. Check WhatsApp chat if not opened automatically.</p>
-            <p className="text-sm text-green-600 mb-6">Admin will confirm shortly on +91 93924 73392</p>
-          </motion.div>
-        )}
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              
+              {/* Row 1: Name & Age (As drawn in Wireframe) */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-5">
+                <div className="sm:col-span-8">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Patient Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter full name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                  />
+                </div>
+
+                <div className="sm:col-span-4">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Age <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    max="120"
+                    placeholder="e.g. 32"
+                    value={formData.age}
+                    onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Gender & Contact Phone */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-5">
+                <div className="sm:col-span-5">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Gender <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {['Male', 'Female', 'Other'].map((g) => (
+                      <button
+                        type="button"
+                        key={g}
+                        onClick={() => setFormData({ ...formData, gender: g })}
+                        className={`py-2.5 text-xs sm:text-sm font-semibold rounded-xl border transition ${
+                          formData.gender === g
+                            ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
+                            : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-teal-500'
+                        }`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="sm:col-span-7">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Phone / WhatsApp Number
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="e.g. 9876543210"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                  />
+                </div>
+              </div>
+
+              {/* Condition Section (Interactive Cascading Selector from Wireframe) */}
+              <div className="space-y-3 pt-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Select Primary Medical Condition <span className="text-red-500">*</span>
+                </label>
+                
+                {/* Primary Category Selector */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {Object.keys(conditionOptions).map((catKey) => {
+                    const isSelected = formData.condition === catKey;
+                    return (
+                      <button
+                        key={catKey}
+                        type="button"
+                        onClick={() => handleConditionChange(catKey)}
+                        className={`p-3 rounded-xl border text-sm font-bold transition flex items-center justify-center text-center ${
+                          isSelected
+                            ? 'bg-gradient-to-r from-teal-500 to-blue-600 text-white border-transparent shadow-md'
+                            : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-teal-400'
+                        }`}
+                      >
+                        {catKey}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Sub-Condition / Body Region Selector (Shoulder, Elbow, Knee, Stroke, etc.) */}
+                <div className="p-4 bg-gray-50/80 dark:bg-gray-700/50 rounded-2xl border border-gray-200/80 dark:border-gray-600">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2.5">
+                    Specific Area / Concern for <span className="text-teal-600 dark:text-teal-400">{formData.condition}</span>:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {conditionOptions[formData.condition]?.map((sub) => {
+                      const isSubSelected = formData.subCondition === sub;
+                      return (
+                        <button
+                          key={sub}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, subCondition: sub })}
+                          className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition ${
+                            isSubSelected
+                              ? 'bg-teal-600 text-white shadow-sm'
+                              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-teal-400'
+                          }`}
+                        >
+                          {sub}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 3: Description (Wireframe Textarea) */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                  Description of Symptoms & Pain History
+                </label>
+                <textarea
+                  rows="3"
+                  placeholder="Describe where the pain is located, how long you have had it, and any previous treatments..."
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                ></textarea>
+              </div>
+
+              {/* Submit Button (Wireframe: [ Request in 💬/@ ]) */}
+              <div className="pt-2">
+                <motion.button
+                  type="submit"
+                  disabled={isSubmitting}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-3.5 sm:py-4 px-4 sm:px-6 rounded-2xl text-sm sm:text-base font-bold text-white bg-gradient-to-r from-teal-500 via-blue-600 to-teal-500 bg-[length:200%_auto] hover:bg-right shadow-lg shadow-teal-500/25 hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-2 sm:space-x-3 disabled:opacity-70 cursor-pointer"
+                >
+                  {isSubmitting ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <>
+                      <FaWhatsapp className="text-xl text-green-400" />
+                      <span>Request in WhatsApp & Send Email</span>
+                      <FaEnvelope className="text-sm opacity-80" />
+                    </>
+                  )}
+                </motion.button>
+                <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-2.5">
+                  Notification sent to <span className="font-semibold text-gray-700 dark:text-gray-300">shaheedshaik236@gmail.com</span> & WhatsApp instant chat.
+                </p>
+              </div>
+
+            </form>
+          )}
+        </motion.div>
+
       </div>
     </section>
   );

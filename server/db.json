@@ -1,25 +1,27 @@
 {
-  "stories": [
-    {
-      "id": "1",
-      "title": "Back Pain Recovery",
-      "description": "Patient recovered completely in just 2 weeks with our personalized home physiotherapy program.",
-      "image": null,
-      "createdAt": "2024-04-01T10:00:00.000Z"
-    },
-    {
-      "id": "2",
-      "title": "Sports Injury Rehabilitation",
-      "description": "Professional athlete returned to peak performance after targeted rehab sessions at home.",
-      "image": null,
-      "createdAt": "2024-04-05T14:30:00.000Z"
-    },
-    {
-      "id": "3",
-      "title": "Post-Surgery Mobility",
-      "description": "Rapid recovery and improved mobility after knee surgery with consistent home visits.",
-      "image": null,
-      "createdAt": "2024-04-10T09:15:00.000Z"
-    }
-  ]
+  "stories": [],
+  "bookings": [],
+  "profile": {
+    "name": "Dr. Shaik Mohamed Shaheed",
+    "credentials": "B.P.T, CDNT.",
+    "title": "Consultant Physiotherapist & Certified Dry Needling Therapist",
+    "bio": "Modern physiotherapy and advanced rehabilitation tailored for active, pain-free recovery.",
+    "image": "/uploads/doctor-photo.png"
+  },
+  "settings": {
+    "serviceMode": "both",
+    "serviceArea": "Home visits across the city & surrounding areas",
+    "clinicAddress": "Physio Pulse Clinic, Home service, India",
+    "phone": "9392473392",
+    "whatsapp": "9392473392",
+    "email": "shaheedshaik236@gmail.com",
+    "timings": "Monday - Saturday: 8:00 AM - 8:00 PM",
+    "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15228.471553580572!2d78.4746!3d17.3850!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDIzJzA2LjAiTiA3OMKwMjgnMjguNiJF!5e0!3m2!1sen!2sin!4v1600000000000!5m2!1sen!2sin",
+    "instagram": "physioonreels",
+    "instagramUrl": "https://instagram.com/physioonreels",
+    "facebook": "Physio Pulse Clinic",
+    "facebookUrl": "https://facebook.com",
+    "youtube": "physioonreels",
+    "youtubeUrl": "https://youtube.com/@physioonreels?si=S2lBoYVgr6a5Ng2R"
+  }
 }

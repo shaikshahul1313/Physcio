@@ -22,8 +22,8 @@ node server.js  # http://localhost:5000
 
 ## Admin Login
 - URL: http://localhost:5173/admin
-- Username: Admin@123
-- Password: ShaikshaheedAdmin@123
+- Username: Shaikshaheed143
+- Password: Shaikshaheed143786
 
 ## Test Posture
 - Allow camera
@@ -34,3 +34,5 @@ node server.js  # http://localhost:5000
 - Gmail app password: Google Account > Security > App passwords
 
 Enjoy your advanced posture analyzer!
+
+
