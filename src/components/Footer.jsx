@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { FaInstagram, FaYoutube, FaFacebook, FaHeartbeat, FaPhone, FaEnvelope, FaMapMarkerAlt, FaWhatsapp, FaLock } from 'react-icons/fa';
 import { usePractice } from '../context/PracticeContext';
 
@@ -156,14 +157,14 @@ const Footer = () => {
 
         <div className="border-t border-gray-800 mt-10 pt-6 flex items-center justify-center text-xs text-gray-500 gap-2 text-center">
           <span>&copy; {new Date().getFullYear()} Physio Pulse Clinic. All rights reserved.</span>
-          <a
-            href="/admin"
-            className="text-gray-600 hover:text-teal-400 transition-colors p-1 rounded inline-flex items-center opacity-60 hover:opacity-100"
+          <Link
+            to="/admin"
+            className="text-gray-600 hover:text-teal-400 transition-colors p-1 rounded inline-flex items-center opacity-60 hover:opacity-100 cursor-pointer"
             title="Admin Console"
             aria-label="Admin Console"
           >
             <FaLock size={11} />
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

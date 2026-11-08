@@ -306,10 +306,10 @@ const AdminDashboard = () => {
                   src={
                     photoPreview ||
                     (profileData.image
-                      ? (profileData.image.startsWith('http')
+                      ? (profileData.image.startsWith('http') || profileData.image.startsWith('data:')
                           ? profileData.image
                           : (profileData.image.startsWith('/uploads')
-                              ? `http://localhost:5000${profileData.image}`
+                              ? (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? `http://localhost:5000${profileData.image}` : profileData.image)
                               : profileData.image))
                       : '/doctor-photo.png')
                   }

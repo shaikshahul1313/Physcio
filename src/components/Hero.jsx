@@ -34,11 +34,11 @@ const Hero = () => {
   };
 
   const serviceBadge = getServiceBadge();
-  const imageUrl = profile.image
-    ? (profile.image.startsWith('http')
+  const imageUrl = profile?.image
+    ? (profile.image.startsWith('http') || profile.image.startsWith('data:')
         ? profile.image
         : (profile.image.startsWith('/uploads')
-            ? `http://localhost:5000${profile.image}`
+            ? (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? `http://localhost:5000${profile.image}` : profile.image)
             : profile.image))
     : '/doctor-photo.png';
 
