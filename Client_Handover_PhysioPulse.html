@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Physio Pulse - Project Handover Document</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      width: 210mm;
+      height: 297mm;
+      max-height: 297mm;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: #0f172a;
+      line-height: 1.35;
+      font-size: 11px;
+    }
+
+    /* Container */
+    .sheet {
+      width: 210mm;
+      height: 297mm;
+      padding: 14mm 16mm 12mm 16mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0d9488 0%, #0284c7 60%, #1e3a8a 100%);
+      color: #ffffff;
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(13, 148, 136, 0.2);
+    }
+    .header-left h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-left p {
+      margin: 3px 0 0 0;
+      font-size: 12px;
+      color: #ccfbf1;
+      font-weight: 500;
+    }
+    .header-right {
+      text-align: right;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .doctor-name {
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    .doctor-creds {
+      font-size: 10px;
+      color: #e0f2fe;
+    }
+
+    /* Credentials & Access Bar */
+    .access-box {
+      margin-top: 10px;
+      background: #f0fdfa;
+      border: 1.5px solid #5eead4;
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: 1.2fr 1.3fr 1.5fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .access-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .access-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: #0f766e;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .access-val {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 1px;
+    }
+    .access-val a {
+      color: #0284c7;
+      text-decoration: none;
+    }
+    .cred-tag {
+      background: #0f766e;
+      color: #ffffff;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 11px;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    /* Grid Sections */
+    .section-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 11px 0 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 3px;
+    }
+    .section-title .dot {
+      width: 7px;
+      height: 7px;
+      background: #0d9488;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f766e;
+      margin-bottom: 4px;
+    }
+    .card-header .icon {
+      font-size: 13px;
+    }
+    .card ul {
+      margin: 0;
+      padding-left: 14px;
+    }
+    .card li {
+      margin-bottom: 2px;
+      color: #334155;
+      font-size: 10px;
+    }
+    .card strong {
+      color: #0f172a;
+    }
+
+    /* Highlight Banner for Secret Lock */
+    .secret-lock-banner {
+      margin-top: 8px;
+      background: #f1f5f9;
+      border-left: 4px solid #0d9488;
+      border-radius: 0 8px 8px 0;
+      padding: 7px 12px;
+      font-size: 10px;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .secret-lock-banner strong {
+      color: #0f172a;
+    }
+
+    /* 3-Column Highlights */
+    .highlight-strip {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+    .stat-card {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 7px 10px;
+      text-align: center;
+    }
+    .stat-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #0284c7;
+      text-transform: uppercase;
+    }
+    .stat-desc {
+      font-size: 9.5px;
+      color: #475569;
+      margin-top: 2px;
+    }
+
+    /* Quick Guide Table */
+    .guide-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 9.5px;
+    }
+    .guide-table th {
+      background: #f1f5f9;
+      color: #334155;
+      text-align: left;
+      padding: 4px 8px;
+      border-bottom: 1.5px solid #cbd5e1;
+      font-weight: 700;
+    }
+    .guide-table td {
+      padding: 4px 8px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+    }
+    .guide-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1.5px solid #e2e8f0;
+      padding-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 9px;
+      color: #64748b;
+    }
+    .footer-left strong {
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    
+    <!-- Header -->
+    <div>
+      <div class="header">
+        <div class="header-left">
+          <h1>⚡ Physio Pulse Clinic</h1>
+          <p>Modern Clinical Physiotherapy, Dry Needling & Rehabilitation Platform</p>
+        </div>
+        <div class="header-right">
+          <span class="badge">Project Handover</span>
+          <div class="doctor-name">Dr. Shaik Mohamed Shaheed</div>
+          <div class="doctor-creds">B.P.T, CDNT. — Consultant Physiotherapist</div>
+        </div>
+      </div>
+
+      <!-- Access & Credentials Box -->
+      <div class="access-box">
+        <div class="access-item">
+          <span class="access-label">Live Patient Website</span>
+          <span class="access-val"><a href="https://physcio.vercel.app">physcio.vercel.app</a></span>
+        </div>
+        <div class="access-item">
+          <span class="access-label">Admin Management Portal</span>
+          <span class="access-val"><a href="https://physcio.vercel.app/admin">physcio.vercel.app/admin</a></span>
+        </div>
+        <div class="access-item">
+          <span class="access-label">Admin Login Credentials</span>
+          <div class="access-val">
+            User: <span class="cred-tag">Shaikshaheed143</span> Pass: <span class="cred-tag">Shaikshaheed143786</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Privacy Notice Banner -->
+      <div class="secret-lock-banner">
+        <span style="font-size: 15px;">🔒</span>
+        <div>
+          <strong>Client Privacy Protected:</strong> The "Admin" text has been completely removed from public patient menus. You can access the console anytime by tapping the <strong>discreet lock icon (🔒)</strong> centered at the bottom of the footer, or via direct URL.
+        </div>
+      </div>
+
+      <!-- Key Delivered Modules (Grid) -->
+      <div class="section-title">
+        <span class="dot"></span> Delivered Platform Capabilities & Admin Controls
+      </div>
+
+      <div class="features-grid">
+        <!-- Card 1: Dynamic Social & Contacts -->
+        <div class="card">
+          <div class="card-header">
+            <span class="icon">📱</span> Dynamic Social Media & Contact Control
+          </div>
+          <ul>
+            <li><strong>Instagram Handle & URL:</strong> Fully editable from Admin (Default: <code>@physioonreels</code>).</li>
+            <li><strong>Facebook & YouTube Links:</strong> Instant admin updates to handles and direct profile links.</li>
+            <li><strong>Direct WhatsApp & Phone:</strong> Consultation line (<code>+91 9392473392</code>) dynamic across site.</li>
+            <li><strong>Practice Timings & Map:</strong> Update clinic hours and Google Maps embed with zero coding.</li>
+          </ul>
+        </div>
+
+        <!-- Card 2: Practice Service Mode -->
+        <div class="card">
+          <div class="card-header">
+            <span class="icon">🏥</span> Practice Service Mode (Home / Clinic)
+          </div>
+          <ul>
+            <li><strong>Home Visits Only:</strong> Set when exclusively offering doorstep patient sessions.</li>
+            <li><strong>In-Clinic Visits:</strong> Set when treating patients on clinic premises.</li>
+            <li><strong>Both Available:</strong> Active mode showing home visits & in-clinic flexibility.</li>
+            <li><strong>Instant Sync:</strong> Live hero badge and contact banner update immediately upon saving.</li>
+          </ul>
+        </div>
+
+        <!-- Card 3: Patient Booking & WhatsApp Routing -->
+        <div class="card">
+          <div class="card-header">
+            <span class="icon">📅</span> Patient Bookings & Instant WhatsApp Lead Routing
+          </div>
+          <ul>
+            <li><strong>Interactive Booking Form:</strong> Patient selects condition, sub-category, age, and date.</li>
+            <li><strong>Instant WhatsApp Dispatch:</strong> Generates a pre-formatted referral directly to doctor's WhatsApp.</li>
+            <li><strong>Admin Bookings Log:</strong> Review all patient inquiries, symptoms notes, age, and dates.</li>
+            <li><strong>Status Management:</strong> Toggle status (<code>New</code> ↔ <code>Contacted</code>) or delete completed records.</li>
+          </ul>
+        </div>
+
+        <!-- Card 4: AI Recovery Assistant -->
+        <div class="card">
+          <div class="card-header">
+            <span class="icon">🤖</span> Intelligent AI Clinical Recovery Assistant
+          </div>
+          <ul>
+            <li><strong>Smart Triage:</strong> Analyzes pain in Lower Back, Sciatica, Neck, Knee, Shoulder, and Ankles.</li>
+            <li><strong>Non-Repetitive Responses:</strong> Retains context and provides structured relief tips.</li>
+            <li><strong>CDNT & Home Visit Expertise:</strong> Explains Dry Needling therapy and doorstep protocols.</li>
+            <li><strong>1-Tap CTAs:</strong> Action buttons inside chat for instant booking or WhatsApp messaging.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section: Clinical Sections & Mobile Optimization -->
+      <div class="section-title">
+        <span class="dot"></span> Clinical Modules & Technical Highlights
+      </div>
+
+      <div class="highlight-strip">
+        <div class="stat-card">
+          <div class="stat-title">Doctor Branding</div>
+          <div class="stat-desc">Custom doctor portrait with B.P.T, CDNT credentials, verified badges, and customizable bio.</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Exercise Library</div>
+          <div class="stat-desc">Targeted rehab routines for Desk Workers, Spine Stability, Knee Longevity, and Mobility.</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Success Stories</div>
+          <div class="stat-desc">Publish and manage verified patient recovery testimonials with pictures directly from Admin.</div>
+        </div>
+      </div>
+
+      <!-- Quick Admin Workflow Table -->
+      <table class="guide-table">
+        <thead>
+          <tr>
+            <th style="width: 25%;">Task</th>
+            <th style="width: 35%;">Admin Tab Location</th>
+            <th style="width: 40%;">Expected Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Update Social / Phone / WhatsApp</strong></td>
+            <td>Admin > <em>Service & Social</em> Tab</td>
+            <td>Updates Instagram, YouTube, Facebook, WhatsApp, and timings across footer & contact sections.</td>
+          </tr>
+          <tr>
+            <td><strong>Change Service Availability</strong></td>
+            <td>Admin > <em>Service & Social</em> Tab</td>
+            <td>Switches live website badge between Home Visits, Clinic, or Both instantly.</td>
+          </tr>
+          <tr>
+            <td><strong>Update Doctor Photo / Bio</strong></td>
+            <td>Admin > <em>Doctor Profile</em> Tab</td>
+            <td>Uploads new image or edits titles; persists automatically on the live homepage.</td>
+          </tr>
+          <tr>
+            <td><strong>Review Patient Inquiries</strong></td>
+            <td>Admin > <em>Bookings</em> Tab</td>
+            <td>Shows new patient submissions, one-click WhatsApp chat link, and contact status toggles.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-left">
+        <strong>Physio Pulse Platform Handover</strong> • Designed for Dr. Shaik Mohamed Shaheed • Production Ready
+      </div>
+      <div class="footer-right">
+        Status: <strong>Live & Deployed</strong> (Vercel SPA + Git Synced)
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
